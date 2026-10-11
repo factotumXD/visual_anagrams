@@ -159,7 +159,7 @@ cfg_scale_view = 20
 
 As cfg_scale_view increases, the horse becomes more salient in the image.
 
-You may like to try the following command:
+Sometimes the model prefers one prompt over another. You can alleviate this by tuning their CFG scales. Try the following command to see for yourself:
 ```
 for v in {2..10}; do
   python generate.py "${l2p_args[@]}" \
