@@ -1,7 +1,7 @@
 # Visual Anagrams with Flow Matching
-<video controls src="assets/flip.campfire.man.mp4" title="Title"></video>
-<video controls src="assets/negate.landscape.houseplants.mp4" title="Title"></video>
-<video controls src="assets/rotate_cw.village.horse.2cfgs.10.mp4" title="Title"></video>
+![alt text](assets/flip.campfire.man.gif)
+![alt text](assets/rotate_cw.village.horse.2cfgs.10.gif)
+![alt text](assets/negate.landscape.houseplants.gif)
 
 A flow matching version of [visual_anagrams](https://github.com/dangeng/visual_anagrams). The code uses [L2P](https://nju-pcalab.github.io/projects/L2P/), a pixel-space flow-matching text-to-image model, to generate visual anagrams. These are images that change appearance or identity when transformed, such as by a rotation, a color inversion, or a jigsaw rearrangement. Read the [original paper](https://arxiv.org/abs/2311.17919) for more details.
 
@@ -139,14 +139,22 @@ python generate.py "${l2p_args[@]}" \
   --seed 42\
   --save_metadata
 ```
-cfg_scale_view = 3:
-<video controls src="assets/rotate_cw.village.horse.2cfgs.3.mp4" title="Title"></video>
-cfg_scale_view = 7:
-<video controls src="assets/rotate_cw.village.horse.2cfgs.7.mp4" title="Title"></video>
-cfg_scale_view = 10:
-<video controls src="assets/rotate_cw.village.horse.2cfgs.10.mp4" title="Title"></video>
-cfg_scale_view = 20:
-<video controls src="assets/rotate_cw.village.horse.2cfgs.20.mp4" title="Title"></video>
+
+cfg_scale_view = 3
+
+![cfg_scale_view = 3](assets/rotate_cw.village.horse.2cfgs.3.gif)
+
+cfg_scale_view = 7
+
+![cfg_scale_view = 7](assets/rotate_cw.village.horse.2cfgs.7.gif)
+
+cfg_scale_view = 10
+
+![cfg_scale_view = 10](assets/rotate_cw.village.horse.2cfgs.10.gif)
+
+cfg_scale_view = 20
+
+![cfg_scale_view = 20](assets/rotate_cw.village.horse.2cfgs.20.gif)
 
 As cfg_scale_view increases, the horse becomes more salient in the image.
 

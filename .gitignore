@@ -3,3 +3,4 @@ results*
 .vscode/
 __pycache__/
 .kilo/
+assets/*.mp4
