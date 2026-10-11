@@ -158,5 +158,23 @@ cfg_scale_view = 20
 
 As cfg_scale_view increases, the horse becomes more salient in the image.
 
+You may like to try the following command:
+```
+for v in {2..10}; do
+  python generate.py "${l2p_args[@]}" \
+    --name "rotate_180.sunflower.lionFace.woodcut.${v}" \
+    --prompts "a sunflower" "a lion's face" \
+    --style "a woodcut of" \
+    --views identity rotate_180 \
+    --num_samples 10 \
+    --height 1024 --width 1024 \
+    --num_inference_steps 50 \
+    --cfg_scale 10 \
+    --cfg_scale_view "$v" \
+    --seed 42 \
+    --save_metadata
+done
+```
+
 ## Performance
 50 inference steps take about a minute on one RTX 5090.
