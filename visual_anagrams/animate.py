@@ -158,7 +158,7 @@ def animate_two_view(
 
     # Save as video
     print('Making video...')
-    imageio.mimsave(save_video_path, image_array, fps=30)
+    imageio.mimsave(save_video_path, image_array, fps=30, codec='libx264')
 
 
 
@@ -312,4 +312,4 @@ def animate_two_view_motion_blur(
 
     # Save as video
     print('Making video...')
-    imageio.mimsave(save_video_path, image_array, fps=30)
+    imageio.mimsave(save_video_path, image_array, fps=30, codec='libx264')

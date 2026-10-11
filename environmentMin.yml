@@ -1,0 +1,23 @@
+# Runtime dependencies for the current generate.py; run from the repository root.
+name: visual_anagrams_min
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - torch>=2.4
+      - torchvision
+      - transformers>=4.51
+      - numpy
+      - pillow
+      - einops
+      - safetensors
+      - tqdm
+      # Required by eager imports in the bundled DiffSynth package.
+      - imageio
+      - pandas
+      - modelscope
+      - accelerate
+      - peft
+      - imageio[pyav]

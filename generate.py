@@ -3,19 +3,31 @@ from pathlib import Path
 from PIL import Image
 
 import torch
-from diffsynth.pipelines.z_image_L2P import ZImagePipeline, ModelConfig
+from diffsynth.pipelines.z_image_L2P import ZImagePipeline, ModelConfig, ZImageUnit_PromptEmbedder
 import torchvision.transforms.functional as TF
 
 from visual_anagrams.views import get_views
-from visual_anagrams.samplers import sample
+from visual_anagrams.samplers import sample_l2p
 from visual_anagrams.utils import add_args, save_illusion, save_metadata
 
-
+from tqdm import tqdm
 
 # Parse args
 parser = argparse.ArgumentParser()
 parser = add_args(parser)
 args = parser.parse_args()
+if args.cfg_scale_view is None:
+    args.cfg_scale_view = args.cfg_scale
+
+if len(args.views) != len(args.prompts):
+    parser.error('--views must contain one view per prompt')
+
+if args.negative_prompts is None:
+    args.negative_prompts = [''] * len(args.prompts)
+elif len(args.negative_prompts) == 1:
+    args.negative_prompts = args.negative_prompts * len(args.prompts)
+elif len(args.negative_prompts) != len(args.prompts):
+    parser.error('--negative_prompts must contain one prompt or one per positive prompt')
 
 # Do admin stuff
 save_dir = Path(args.save_dir) / args.name
@@ -28,56 +40,50 @@ if args.ref_im_path is not None:
 else:
     ref_im = None
 
-main_model_path = "/path/model-1k-merge.safetensors"
-
-text_encoder_paths = [
-    "/path/Z-Image-Turbo/text_encoder/model-00001-of-00003.safetensors",
-    "/path/Z-Image-Turbo/text_encoder/model-00002-of-00003.safetensors",
-    "/path/Z-Image-Turbo/text_encoder/model-00003-of-00003.safetensors",
-]
-
-tokenizer_path = "/path/Z-Image-Turbo/tokenizer"
+torch.manual_seed(args.seed)
 
 pipe = ZImagePipeline.from_pretrained(
-    torch_dtype=torch.bfloat16,
-    device="cuda",
+    torch_dtype=getattr(torch, args.dtype),
+    device=args.device,
     model_configs=[
-        ModelConfig(path=[main_model_path]),
-        ModelConfig(path=text_encoder_paths),
+        ModelConfig(path=[args.main_model_path]),
+        ModelConfig(path=args.text_encoder_paths),
     ],
-    tokenizer_config=ModelConfig(path=tokenizer_path),
+    tokenizer_config=ModelConfig(path=args.tokenizer_path),
 )
-pipe.enable_model_cpu_offload()
-pipe = pipe.to(args.device)
 
 # Get prompt embeddings
 prompts = [f'{args.style} {p}'.strip() for p in args.prompts]
-prompt_embeds = [pipe.encode_prompt(p) for p in prompts]
-prompt_embeds, negative_prompt_embeds = zip(*prompt_embeds)
-prompt_embeds = torch.cat(prompt_embeds)
-negative_prompt_embeds = torch.cat(negative_prompt_embeds)  # These are just null embeds
+embedder = ZImageUnit_PromptEmbedder()
+prompt_embeds = embedder.process(pipe, prompts.copy())['prompt_embeds']
+negative_prompt_embeds = embedder.process(pipe, args.negative_prompts.copy())['prompt_embeds']
 
 # Get views
 views = get_views(args.views, view_args=args.view_args)
 
 # Save metadata
-save_metadata(views, args, save_dir)
+if args.save_metadata:
+    save_metadata(views, args, save_dir)
 
 # Sample illusions
-for i in range(args.num_samples):
+for i in tqdm(range(args.num_samples)):
     # Admin stuff
-    generator = torch.manual_seed(args.seed + i)
-    sample_dir = save_dir / f'{args.seed + i:04}'
+    seed = args.seed + i
+    sample_dir = save_dir / f'{seed:04}'
     sample_dir.mkdir(exist_ok=True, parents=True)
 
-    image = sample(pipe, 
+    image = sample_l2p(
+                    pipe, 
                     prompt_embeds,
                     negative_prompt_embeds,
                     views,
                     ref_im=ref_im,
                     num_inference_steps=args.num_inference_steps,
-                    guidance_scale=args.guidance_scale,
+                    cfg_scale=args.cfg_scale,
+                    cfg_scale_view=args.cfg_scale_view,
                     reduction=args.reduction,
-                    generator=generator)
+                    height=args.height, 
+                    width=args.width,
+                    seed=seed,
+                    rand_device=args.rand_device,)
     save_illusion(image, views, sample_dir)
-
