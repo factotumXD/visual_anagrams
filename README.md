@@ -178,4 +178,4 @@ done
 ```
 
 ## Performance
-50 inference steps take about a minute on one RTX 5090.
+Inference uses 28756 MiB(around 28.1 GiB) of GPU memory. 50 inference steps take about a minute on one RTX 5090.
